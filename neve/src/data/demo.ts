@@ -27,6 +27,10 @@ export function buildDemoData(): AppData {
   const accounts: AppData['accounts'] = [
     account('acc-checking', 'Compte courant', 'bank', 'CHF', 'Banque cantonale'),
     account('acc-savings', 'Épargne', 'bank', 'CHF', 'Banque cantonale'),
+    account('acc-neobank', 'Néobanque', 'bank', 'CHF', 'Néobanque'),
+    account('acc-eur', 'Compte EUR', 'bank', 'EUR', 'Banque en ligne'),
+    account('acc-cash', 'Espèces', 'cash', 'CHF'),
+    account('acc-lpp', '2e pilier', 'pension', 'CHF', 'Caisse de pension'),
     account('acc-pension', '3e pilier', 'pension', 'CHF', 'Assurance'),
     account('acc-robo', 'Robo-trading', 'brokerage', 'CHF', 'Robo-advisor'),
   ];
@@ -34,6 +38,10 @@ export function buildDemoData(): AppData {
   const assets: Asset[] = [
     manualAsset('ast-cash-chf', 'Liquidités CHF', 'cash', 'CHF'),
     manualAsset('ast-savings', 'Épargne CHF', 'cash', 'CHF'),
+    manualAsset('ast-neo', 'Solde néobanque', 'cash', 'CHF'),
+    manualAsset('ast-eur', 'Liquidités EUR', 'cash', 'EUR'),
+    manualAsset('ast-espece', 'Espèces', 'cash', 'CHF'),
+    manualAsset('ast-lpp', '2e pilier — avoir', 'pension', 'CHF'),
     manualAsset('ast-3p', '3e pilier — fonds', 'pension', 'CHF'),
     marketAsset('ast-robo', 'Portefeuille géré', undefined, 'fund', 'CHF'),
   ];
@@ -41,6 +49,10 @@ export function buildDemoData(): AppData {
   const positions: Position[] = [
     manualPosition('acc-checking', 'ast-cash-chf', 8500),
     manualPosition('acc-savings', 'ast-savings', 24000),
+    manualPosition('acc-neobank', 'ast-neo', 2400),
+    manualPosition('acc-eur', 'ast-eur', 2800, 'EUR'),
+    manualPosition('acc-cash', 'ast-espece', 650),
+    manualPosition('acc-lpp', 'ast-lpp', 95000),
     manualPosition('acc-pension', 'ast-3p', 58000),
     // Compte robo : capital investi (coût) + valeur actuelle (via prix indicatif).
     roboPosition('acc-robo', 'ast-robo', 30000),
@@ -213,14 +225,19 @@ function marketAsset(
   };
 }
 
-function manualPosition(accountId: string, assetId: string, valueMajor: number): Position {
+function manualPosition(
+  accountId: string,
+  assetId: string,
+  valueMajor: number,
+  currency = 'CHF',
+): Position {
   return {
     id: createId('pos'),
     accountId,
     assetId,
     quantityDecimal: '1',
     manualValueMinor: Math.round(valueMajor * 100),
-    manualValueCurrency: 'CHF',
+    manualValueCurrency: currency,
     isArchived: false,
     openedAt: daysAgoIso(400),
   };
