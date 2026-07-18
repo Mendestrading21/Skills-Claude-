@@ -10,6 +10,7 @@ import { useAppStore } from '@/store';
 export default function RootLayout() {
   const init = useAppStore((s) => s.init);
   const reducedTransparency = useAppStore((s) => s.data.preferences.reducedTransparency);
+  const hideAmounts = useAppStore((s) => s.data.preferences.hideAmounts ?? false);
 
   useEffect(() => {
     init();
@@ -18,7 +19,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.background }}>
       <SafeAreaProvider>
-        <ThemeProvider reducedTransparency={reducedTransparency}>
+        <ThemeProvider reducedTransparency={reducedTransparency} hideAmounts={hideAmounts}>
           <StatusBar style="light" />
           <Stack
             screenOptions={{
@@ -34,6 +35,7 @@ export default function RootLayout() {
             <Stack.Screen name="assistant" options={{ presentation: 'card' }} />
             <Stack.Screen name="challenges" options={{ presentation: 'card' }} />
             <Stack.Screen name="position/[id]" />
+            <Stack.Screen name="account/[id]" />
           </Stack>
         </ThemeProvider>
       </SafeAreaProvider>

@@ -184,6 +184,8 @@ export type UserPreferences = {
   onboarded: boolean;
   /** Optional net-worth objective in minor units (0/undefined = unset). */
   netWorthTargetMinor?: number;
+  /** Mask all monetary amounts behind dots for on-screen privacy. */
+  hideAmounts?: boolean;
 };
 
 /** The full persisted document. */

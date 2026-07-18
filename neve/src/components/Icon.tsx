@@ -25,6 +25,8 @@ export type IconName =
   | 'trash'
   | 'lock'
   | 'shield'
+  | 'eye'
+  | 'eyeOff'
   | 'info';
 
 export type IconProps = {
@@ -118,6 +120,19 @@ export function Icon({ name, size = 22, color = palette.textSecondary, strokeWid
         </>
       )}
       {name === 'shield' && <Path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z" {...common} />}
+      {name === 'eye' && (
+        <>
+          <Path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" {...common} />
+          <Circle cx={12} cy={12} r={3} {...common} />
+        </>
+      )}
+      {name === 'eyeOff' && (
+        <>
+          <Path d="M4 4l16 16" {...common} />
+          <Path d="M9.9 5.2A9.5 9.5 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3 3.6M6.3 6.4A17 17 0 0 0 2 12s3.5 7 10 7a9.5 9.5 0 0 0 3.3-.6" {...common} />
+          <Path d="M9.5 9.6a3 3 0 0 0 4.2 4.2" {...common} />
+        </>
+      )}
       {name === 'info' && (
         <>
           <Circle cx={12} cy={12} r={9} {...common} />

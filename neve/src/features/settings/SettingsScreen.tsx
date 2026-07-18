@@ -93,10 +93,10 @@ export function SettingsScreen() {
         <RowDivider />
         <ToggleRow
           icon="lock"
-          title={t.settings.appLock}
-          subtitle="Nécessite un appareil compatible."
-          value={prefs.appLockEnabled}
-          onChange={(v) => setPreferences({ appLockEnabled: v })}
+          title="Masquer les montants"
+          subtitle="Remplace les montants affichés par des points."
+          value={prefs.hideAmounts ?? false}
+          onChange={(v) => setPreferences({ hideAmounts: v })}
         />
       </GlassCard>
 

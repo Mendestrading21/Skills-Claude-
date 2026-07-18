@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import {
@@ -9,6 +9,7 @@ import {
   Avatar,
   EmptyState,
   GlassCard,
+  Icon,
   ListRow,
   ProgressBar,
   RowDivider,
@@ -127,27 +128,48 @@ export function WealthScreen() {
       </View>
 
       <GlassCard style={styles.block}>
-        {groups.map((g, i) => (
-          <View key={g.key} style={{ marginBottom: i === groups.length - 1 ? 0 : 16 }}>
-            <View style={styles.groupRow}>
-              <View style={styles.groupLabel}>
-                <Avatar emoji={groupEmoji(g.key)} colorIndex={i} size={34} />
-                <Text variant="body" weight="medium" numberOfLines={1} style={{ flexShrink: 1 }}>
-                  {g.label}
+        {groups.map((g, i) => {
+          const tappable = mode === 'accounts';
+          const inner = (
+            <>
+              <View style={styles.groupRow}>
+                <View style={styles.groupLabel}>
+                  <Avatar emoji={groupEmoji(g.key)} colorIndex={i} size={34} />
+                  <Text variant="body" weight="medium" numberOfLines={1} style={{ flexShrink: 1 }}>
+                    {g.label}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <AmountText minor={g.valueMinor} currency={base} variant="cardTitle" />
+                  {tappable ? <Icon name="chevronRight" size={16} color="#737B89" /> : null}
+                </View>
+              </View>
+              <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <ProgressBar ratio={g.ratio} colorIndex={i} />
+                </View>
+                <Text variant="micro" tone="muted" tabular>
+                  {formatPercent(g.ratio, 0)}
                 </Text>
               </View>
-              <AmountText minor={g.valueMinor} currency={base} variant="cardTitle" />
+            </>
+          );
+          return (
+            <View key={g.key} style={{ marginBottom: i === groups.length - 1 ? 0 : 16 }}>
+              {tappable ? (
+                <Pressable
+                  onPress={() => router.push(`/account/${g.key}`)}
+                  accessibilityRole="button"
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  {inner}
+                </Pressable>
+              ) : (
+                inner
+              )}
             </View>
-            <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <View style={{ flex: 1 }}>
-                <ProgressBar ratio={g.ratio} colorIndex={i} />
-              </View>
-              <Text variant="micro" tone="muted" tabular>
-                {formatPercent(g.ratio, 0)}
-              </Text>
-            </View>
-          </View>
-        ))}
+          );
+        })}
       </GlassCard>
 
       {/* Individual positions */}

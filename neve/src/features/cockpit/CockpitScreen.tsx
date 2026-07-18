@@ -58,6 +58,7 @@ export function CockpitScreen() {
   const router = useRouter();
   const data = useAppStore((s) => s.data);
   const loadDemo = useAppStore((s) => s.loadDemo);
+  const setPreferences = useAppStore((s) => s.setPreferences);
   const [range, setRange] = useState<RangeKey>('6M');
 
   const base = data.preferences.baseCurrency;
@@ -108,6 +109,11 @@ export function CockpitScreen() {
         subtitle={`${hello.emoji} ${hello.text}`}
         showLogo
         actions={[
+          {
+            icon: data.preferences.hideAmounts ? 'eyeOff' : 'eye',
+            label: data.preferences.hideAmounts ? 'Afficher les montants' : 'Masquer les montants',
+            onPress: () => setPreferences({ hideAmounts: !data.preferences.hideAmounts }),
+          },
           { icon: 'assistant', label: t.assistant.title, onPress: () => router.push('/assistant') },
           { icon: 'settings', label: t.settings.title, onPress: () => router.push('/settings') },
         ]}
@@ -125,15 +131,18 @@ export function CockpitScreen() {
           <AmountText minor={nw.netWorthMinor} currency={base} variant="display" style={{ marginTop: 6 }} />
           <View style={styles.heroTrend}>
             <TrendBadge ratio={perf.ratio} />
-            <Text variant="meta" tone="secondary">
-              {formatMinor(perf.absoluteMinor, base, { signed: true })} · {rangeLabel(range)}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <AmountText minor={perf.absoluteMinor} currency={base} variant="meta" tone="secondary" signed />
+              <Text variant="meta" tone="secondary">
+                · {rangeLabel(range)}
+              </Text>
+            </View>
           </View>
 
           <View style={[styles.statRow, { borderTopColor: theme.colors.border }]}>
-            <MiniStat label={`💰 ${t.metrics.assets}`} value={formatMinor(nw.assetsMinor, base, { compact: true })} />
-            <MiniStat label={`💳 ${t.metrics.liabilities}`} value={formatMinor(nw.liabilitiesMinor, base, { compact: true })} />
-            <MiniStat label={`💧 ${t.metrics.liquidity}`} value={formatMinor(nw.liquidityMinor, base, { compact: true })} />
+            <MiniStat label={`💰 ${t.metrics.assets}`} minor={nw.assetsMinor} currency={base} />
+            <MiniStat label={`💳 ${t.metrics.liabilities}`} minor={nw.liabilitiesMinor} currency={base} />
+            <MiniStat label={`💧 ${t.metrics.liquidity}`} minor={nw.liquidityMinor} currency={base} />
           </View>
         </GlassCard>
       </AnimatedEntrance>
@@ -177,12 +186,15 @@ export function CockpitScreen() {
                   <ProgressBar ratio={goal.ratio} color={theme.colors.positive} height={10} />
                 </View>
                 <View style={styles.goalFoot}>
-                  <Text variant="meta" tone="secondary" tabular>
-                    {formatMinor(goal.currentMinor, base, { compact: true })} / {formatMinor(goal.targetMinor, base, { compact: true })}
-                  </Text>
-                  <Text variant="meta" tone="muted" tabular>
-                    Reste {formatMinor(goal.remainingMinor, base, { compact: true })}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <AmountText minor={goal.currentMinor} currency={base} variant="meta" tone="secondary" compact />
+                    <Text variant="meta" tone="muted">/</Text>
+                    <AmountText minor={goal.targetMinor} currency={base} variant="meta" tone="secondary" compact />
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text variant="meta" tone="muted">Reste</Text>
+                    <AmountText minor={goal.remainingMinor} currency={base} variant="meta" tone="muted" compact />
+                  </View>
                 </View>
               </>
             ) : (
@@ -249,6 +261,7 @@ export function CockpitScreen() {
             value={<AmountText minor={nw.investmentsMinor} currency={base} variant="cardValue" />}
             caption={sparkValues.length > 1 ? undefined : t.common.toVerify}
             trend={sparkValues.length > 1 ? <Sparkline values={sparkValues} width={90} height={28} /> : undefined}
+            onPress={() => router.push('/(tabs)/portfolio')}
           />
         </View>
         <View style={styles.gridItem}>
@@ -263,7 +276,8 @@ export function CockpitScreen() {
                 {portfolio.totalGainRatio == null ? '—' : formatPercent(portfolio.totalGainRatio)}
               </Text>
             }
-            caption={formatMinor(portfolio.totalGainMinor, base, { signed: true, compact: true })}
+            caption={<AmountText minor={portfolio.totalGainMinor} currency={base} variant="meta" tone="secondary" signed compact />}
+            onPress={() => router.push('/(tabs)/portfolio')}
           />
         </View>
         <View style={styles.gridItem}>
@@ -272,6 +286,7 @@ export function CockpitScreen() {
             value={<AmountText minor={cashFlow.netMinor} currency={base} variant="cardValue" colorBySign />}
             trend={<TrendBadge ratio={cashFlowTrend} size="sm" />}
             caption={t.budget.vsPrevious}
+            onPress={() => router.push('/(tabs)/budget')}
           />
         </View>
         <View style={styles.gridItem}>
@@ -287,6 +302,7 @@ export function CockpitScreen() {
                 t.budget.empty
               )
             }
+            onPress={() => router.push('/(tabs)/budget')}
           />
         </View>
         <View style={styles.gridItem}>
@@ -298,6 +314,7 @@ export function CockpitScreen() {
               </Text>
             }
             caption="ce mois"
+            onPress={() => router.push('/challenges')}
           />
         </View>
         <View style={styles.gridItem}>
@@ -306,6 +323,7 @@ export function CockpitScreen() {
             value={<AmountText minor={monthChange.absoluteMinor} currency={base} variant="cardValue" colorBySign signed compact />}
             trend={<TrendBadge ratio={monthChange.ratio} size="sm" />}
             caption="patrimoine net"
+            onPress={() => router.push('/(tabs)/wealth')}
           />
         </View>
       </View>
@@ -394,15 +412,13 @@ export function CockpitScreen() {
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
+function MiniStat({ label, minor, currency }: { label: string; minor: number; currency: string }) {
   return (
     <View style={styles.miniStat}>
       <Text variant="micro" tone="muted">
         {label}
       </Text>
-      <Text variant="cardTitle" tabular style={{ marginTop: 3 }}>
-        {value}
-      </Text>
+      <AmountText minor={minor} currency={currency} variant="cardTitle" compact style={{ marginTop: 3 }} />
     </View>
   );
 }

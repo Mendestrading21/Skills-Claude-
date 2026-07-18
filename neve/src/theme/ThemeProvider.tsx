@@ -23,9 +23,11 @@ export type Theme = {
   /** True when blur surfaces are allowed. */
   glassEnabled: boolean;
   reducedTransparency: boolean;
+  /** Mask monetary amounts on screen. */
+  hideAmounts: boolean;
 };
 
-function buildTheme(reducedTransparency: boolean): Theme {
+function buildTheme(reducedTransparency: boolean, hideAmounts: boolean): Theme {
   const colors = reducedTransparency
     ? {
         ...palette,
@@ -44,21 +46,24 @@ function buildTheme(reducedTransparency: boolean): Theme {
     shadow,
     glassEnabled: !reducedTransparency,
     reducedTransparency,
+    hideAmounts,
   };
 }
 
-const ThemeContext = createContext<Theme>(buildTheme(false));
+const ThemeContext = createContext<Theme>(buildTheme(false, false));
 
 export function ThemeProvider({
   reducedTransparency = false,
+  hideAmounts = false,
   children,
 }: {
   reducedTransparency?: boolean;
+  hideAmounts?: boolean;
   children: React.ReactNode;
 }) {
   const theme = useMemo(
-    () => buildTheme(reducedTransparency),
-    [reducedTransparency],
+    () => buildTheme(reducedTransparency, hideAmounts),
+    [reducedTransparency, hideAmounts],
   );
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
 }

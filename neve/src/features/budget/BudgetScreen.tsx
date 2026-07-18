@@ -30,11 +30,14 @@ import {
   useAppStore,
 } from '@/store';
 import { useQuickAdd } from '@/features/forms/QuickAddProvider';
+import { RecurringManageSheet } from '@/features/forms/RecurringManageSheet';
+import type { RecurringEntry } from '@/types';
 
 export function BudgetScreen() {
   const router = useRouter();
   const data = useAppStore((s) => s.data);
   const { open: openQuickAdd } = useQuickAdd();
+  const [manageRecurring, setManageRecurring] = React.useState<RecurringEntry | null>(null);
 
   const base = data.preferences.baseCurrency;
   const cash = useMemo(() => selectCashFlow(data), [data]);
@@ -128,7 +131,7 @@ export function BudgetScreen() {
       {/* Upcoming recurring */}
       {upcoming.length > 0 && (
         <>
-          <SectionHeader title={t.budget.upcoming} />
+          <SectionHeader title={t.budget.upcoming} actionLabel={t.common.add} onAction={() => openQuickAdd('recurring')} />
           <GlassCard style={styles.block} padding="sm">
             {upcoming.map((r, i) => (
               <View key={r.id}>
@@ -136,6 +139,8 @@ export function BudgetScreen() {
                 <ListRow
                   title={r.label}
                   subtitle={`${FREQ_LABEL[r.frequency]} · ${formatDateFr(r.nextDate)}`}
+                  onPress={() => setManageRecurring(r)}
+                  showChevron
                   leading={
                     <Avatar
                       emoji={r.type === 'income' ? '💰' : categoryEmoji(r.label, 'expense')}
@@ -196,6 +201,14 @@ export function BudgetScreen() {
       <View style={{ marginTop: 4 }}>
         <Button label={t.budget.addBudget} variant="secondary" onPress={() => openQuickAdd('budget')} />
       </View>
+
+      {manageRecurring ? (
+        <RecurringManageSheet
+          visible={!!manageRecurring}
+          entry={manageRecurring}
+          onClose={() => setManageRecurring(null)}
+        />
+      ) : null}
     </Screen>
   );
 }
