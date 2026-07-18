@@ -1,0 +1,36 @@
+{
+  "baseCurrency": "CHF",
+  "accounts": [
+    {
+      "id": "acc-bank",
+      "name": "Compte courant",
+      "kind": "bank",
+      "currency": "CHF"
+    },
+    {
+      "id": "acc-broker",
+      "name": "Portefeuille principal",
+      "kind": "brokerage",
+      "currency": "CHF"
+    },
+    {
+      "id": "acc-crypto",
+      "name": "Crypto",
+      "kind": "crypto",
+      "currency": "USD"
+    },
+    {
+      "id": "acc-pension",
+      "name": "3e pilier",
+      "kind": "pension",
+      "currency": "CHF"
+    }
+  ],
+  "summary": {
+    "assetsMinor": 31845000,
+    "liabilitiesMinor": 19114000,
+    "netWorthMinor": 12731000,
+    "monthlyCashFlowMinor": 324000
+  },
+  "note": "Jeu de démonstration. Ne jamais fusionner automatiquement avec les données utilisateur."
+}

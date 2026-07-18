@@ -1,0 +1,12 @@
+/**
+ * Stable, collision-resistant id generator that does not depend on native
+ * crypto (works in tests, web and native).
+ */
+let counter = 0;
+
+export function createId(prefix = 'id'): string {
+  counter = (counter + 1) % 1_000_000;
+  const time = Date.now().toString(36);
+  const rand = Math.floor(Math.random() * 0xffffff).toString(36);
+  return `${prefix}_${time}${counter.toString(36)}${rand}`;
+}
