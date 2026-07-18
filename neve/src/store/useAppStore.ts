@@ -64,9 +64,12 @@ export type AppState = {
 
   addRecurring: (input: NewRecurring) => RecurringEntry;
   toggleRecurring: (id: string) => void;
+  removeRecurring: (id: string) => void;
 
   addGoal: (input: NewGoal) => SavingsGoal;
   updateGoal: (id: string, patch: Partial<SavingsGoal>) => void;
+  contributeToGoal: (id: string, amountMinor: number) => void;
+  removeGoal: (id: string) => void;
 
   captureSnapshot: (snapshot: Omit<ValuationSnapshot, 'id'>) => void;
   upsertQuote: (assetId: string, priceMinor: number, currency: string, source?: string) => void;
@@ -260,6 +263,10 @@ export const useAppStore = create<AppState>((set, get) => {
       }));
     },
 
+    removeRecurring(id) {
+      mutate((d) => ({ ...d, recurring: d.recurring.filter((r) => r.id !== id) }));
+    },
+
     addGoal(input) {
       const goal: SavingsGoal = { ...input, id: createId('goal') };
       mutate((d) => ({ ...d, goals: [...d.goals, goal] }));
@@ -271,6 +278,19 @@ export const useAppStore = create<AppState>((set, get) => {
         ...d,
         goals: d.goals.map((g) => (g.id === id ? { ...g, ...patch } : g)),
       }));
+    },
+
+    contributeToGoal(id, amountMinor) {
+      mutate((d) => ({
+        ...d,
+        goals: d.goals.map((g) =>
+          g.id === id ? { ...g, currentMinor: Math.max(0, g.currentMinor + amountMinor) } : g,
+        ),
+      }));
+    },
+
+    removeGoal(id) {
+      mutate((d) => ({ ...d, goals: d.goals.filter((g) => g.id !== id) }));
     },
 
     captureSnapshot(snapshot) {

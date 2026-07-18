@@ -8,6 +8,8 @@ import { BudgetForm } from './BudgetForm';
 import { GoalForm } from './GoalForm';
 import { LiabilityForm } from './LiabilityForm';
 import { PositionForm } from './PositionForm';
+import { RecurringForm } from './RecurringForm';
+import { SavingsGoalForm } from './SavingsGoalForm';
 import { TransactionForm } from './TransactionForm';
 import { UpdateBalancesForm } from './UpdateBalancesForm';
 
@@ -20,7 +22,9 @@ type FormKey =
   | 'liability'
   | 'budget'
   | 'balances'
-  | 'goal';
+  | 'goal'
+  | 'recurring'
+  | 'savings';
 
 type QuickAddContextValue = {
   /** Open the quick-add menu, or jump straight to a specific form. */
@@ -63,9 +67,11 @@ export function QuickAddProvider({ children }: { children: React.ReactNode }) {
             <QuickAction icon="portfolio" label={t.quickAdd.position} onPress={() => setActive('position')} />
             <QuickAction icon="arrowDown" label={t.quickAdd.expense} onPress={() => setActive('expense')} />
             <QuickAction icon="arrowUp" label={t.quickAdd.income} onPress={() => setActive('income')} />
+            <QuickAction icon="refresh" label="Récurrent" onPress={() => setActive('recurring')} />
             <QuickAction icon="budget" label={t.budget.addBudget} onPress={() => setActive('budget')} />
+            <QuickAction icon="target" label="Épargne" onPress={() => setActive('savings')} />
             <QuickAction icon="shield" label={t.quickAdd.liability} onPress={() => setActive('liability')} />
-            <QuickAction icon="target" label="Objectif" onPress={() => setActive('goal')} />
+            <QuickAction icon="target" label="Objectif patrimoine" onPress={() => setActive('goal')} />
           </View>
         </View>
       </BottomSheet>
@@ -78,6 +84,8 @@ export function QuickAddProvider({ children }: { children: React.ReactNode }) {
       <LiabilityForm visible={active === 'liability'} onClose={close} />
       <BudgetForm visible={active === 'budget'} onClose={close} />
       <GoalForm visible={active === 'goal'} onClose={close} />
+      <RecurringForm visible={active === 'recurring'} onClose={close} />
+      <SavingsGoalForm visible={active === 'savings'} onClose={close} />
     </QuickAddContext.Provider>
   );
 }

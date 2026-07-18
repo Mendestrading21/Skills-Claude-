@@ -30,6 +30,7 @@ import {
   selectAllocation,
   selectBudgetTotals,
   selectCashFlow,
+  selectGamification,
   selectNetWorth,
   selectNetWorthGoal,
   selectPerformance,
@@ -71,6 +72,7 @@ export function CockpitScreen() {
   const budgetTotals = useMemo(() => selectBudgetTotals(data), [data]);
   const alerts = useMemo(() => selectPriorityAlerts(data), [data]);
   const goal = useMemo(() => selectNetWorthGoal(data), [data]);
+  const game = useMemo(() => selectGamification(data), [data]);
   const savingsRate = useMemo(() => selectSavingsRate(data), [data]);
   const monthChange = useMemo(() => selectPerformance(data, '1M'), [data]);
   const sparkValues = useMemo(() => data.snapshots.map((s) => s.netWorthMinor), [data.snapshots]);
@@ -191,6 +193,35 @@ export function CockpitScreen() {
                 </Text>
               </View>
             )}
+          </GlassCard>
+        </Pressable>
+      </AnimatedEntrance>
+
+      {/* Progression / saving game */}
+      <AnimatedEntrance delay={72}>
+        <Pressable
+          onPress={() => router.push('/challenges')}
+          accessibilityRole="button"
+          style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+        >
+          <GlassCard style={styles.block} glow="#A979FF">
+            <View style={styles.progressRow}>
+              <View style={[styles.levelChip, { borderColor: theme.colors.accent }]}>
+                <Text variant="cardValue" tone="accent" tabular>
+                  {game.level.level}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text variant="cardTitle">🎮 {game.level.title}</Text>
+                <Text variant="meta" tone="secondary" style={{ marginTop: 1 }}>
+                  🔥 {game.streak} mois · 🏅 {game.badges.filter((b) => b.unlocked).length}/{game.badges.length} badges
+                </Text>
+              </View>
+              <Icon name="chevronRight" size={18} color={theme.colors.textMuted} />
+            </View>
+            <View style={{ marginTop: 12 }}>
+              <ProgressBar ratio={game.level.ratioToNext} />
+            </View>
           </GlassCard>
         </Pressable>
       </AnimatedEntrance>
@@ -410,6 +441,15 @@ const styles = StyleSheet.create({
   alertBar: { width: 3, borderRadius: 3 },
   cta: { marginBottom: 16 },
   ctaCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  levelChip: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   ctaLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   goalHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   goalFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },

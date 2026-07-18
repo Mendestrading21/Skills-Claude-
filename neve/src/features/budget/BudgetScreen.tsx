@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import {
   AmountText,
@@ -31,6 +32,7 @@ import {
 import { useQuickAdd } from '@/features/forms/QuickAddProvider';
 
 export function BudgetScreen() {
+  const router = useRouter();
   const data = useAppStore((s) => s.data);
   const { open: openQuickAdd } = useQuickAdd();
 
@@ -159,7 +161,7 @@ export function BudgetScreen() {
       {/* Goals */}
       {data.goals.length > 0 && (
         <>
-          <SectionHeader title={t.budget.goals} />
+          <SectionHeader title={`🐷 ${t.budget.goals}`} actionLabel="Défis" onAction={() => router.push('/challenges')} />
           <GlassCard style={styles.block}>
             {data.goals.map((g, i) => {
               const ratio = g.targetMinor === 0 ? 0 : g.currentMinor / g.targetMinor;

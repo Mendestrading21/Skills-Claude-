@@ -2,27 +2,36 @@ import {
   allocationByClass,
   budgetProgress,
   budgetTotals,
+  computeBadges,
+  computeLevel,
   computeNetWorth,
   currencyExposure,
+  goalsSummary,
   monthlyCashFlow,
+  monthlyChallenge,
   netWorthSeries,
   rankContributors,
+  savingsStreak,
   seriesPerformance,
   summarizePortfolio,
   valuePositions,
   type AllocationSlice,
+  type Badge,
   type BudgetProgress,
   type BudgetTotals,
   type CashFlow,
+  type Challenge,
   type Contributor,
+  type GoalsSummary,
   type NetWorth,
   type PortfolioContext,
   type PortfolioSummary,
   type PositionValuation,
+  type SaverLevel,
   type SeriesPoint,
 } from '@/domain';
 import type { AppData, Transaction } from '@/types';
-import { currentMonthKey, previousMonthKey, type RangeKey } from '@/utils/date';
+import { currentMonthKey, monthKey, previousMonthKey, type RangeKey } from '@/utils/date';
 import type { AssistantContext } from '@/services/assistant';
 
 export function portfolioContext(data: AppData): PortfolioContext {
@@ -116,6 +125,44 @@ export type NetWorthGoal = {
   remainingMinor: number;
   ratio: number;
 };
+
+export type Gamification = {
+  level: SaverLevel;
+  streak: number;
+  badges: Badge[];
+  challenge: Challenge;
+  goals: GoalsSummary;
+};
+
+/** Assemble the gamification state (level, streak, badges, challenge). */
+export function selectGamification(data: AppData): Gamification {
+  const nw = selectNetWorth(data);
+  const cf = selectCashFlow(data);
+  const budgets = selectBudgetProgress(data);
+  const streak = savingsStreak(data.snapshots);
+  const currencies = new Set([
+    ...data.accounts.map((a) => a.currency),
+    ...data.assets.map((a) => a.quoteCurrency),
+  ]);
+  const monthsTracked = new Set(data.snapshots.map((s) => monthKey(s.capturedAt))).size;
+
+  return {
+    level: computeLevel(nw.netWorthMinor),
+    streak,
+    badges: computeBadges({
+      netWorthMinor: nw.netWorthMinor,
+      streak,
+      goals: data.goals,
+      budgetsCount: budgets.length,
+      budgetsOverCount: budgets.filter((b) => b.isOver).length,
+      currenciesCount: currencies.size,
+      hasPension: data.accounts.some((a) => a.kind === 'pension' && !a.isArchived),
+      monthsTracked,
+    }),
+    challenge: monthlyChallenge(cf.incomeMinor, cf.netMinor),
+    goals: goalsSummary(data.goals),
+  };
+}
 
 /** Progress toward the optional net-worth objective, or null when unset. */
 export function selectNetWorthGoal(data: AppData): NetWorthGoal | null {

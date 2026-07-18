@@ -32,6 +32,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="settings" options={{ presentation: 'card' }} />
             <Stack.Screen name="assistant" options={{ presentation: 'card' }} />
+            <Stack.Screen name="challenges" options={{ presentation: 'card' }} />
             <Stack.Screen name="position/[id]" />
           </Stack>
         </ThemeProvider>
