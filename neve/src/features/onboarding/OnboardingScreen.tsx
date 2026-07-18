@@ -19,7 +19,7 @@ import { useTheme } from '@/theme';
 import { useAppStore } from '@/store';
 import type { CurrencyCode } from '@/types';
 
-const CATEGORIES = ['Comptes', 'Actions & ETF', 'Crypto', 'Prévoyance', 'Immobilier', 'Budget'];
+const CATEGORIES = ['Comptes bancaires', '3e pilier', 'Robo-trading', 'Budget'];
 
 export function OnboardingScreen() {
   const theme = useTheme();
@@ -30,7 +30,7 @@ export function OnboardingScreen() {
 
   const [step, setStep] = useState(0);
   const [currency, setCurrency] = useState<CurrencyCode>('CHF');
-  const [tracked, setTracked] = useState<string[]>(['Comptes', 'Actions & ETF', 'Budget']);
+  const [tracked, setTracked] = useState<string[]>(['Comptes bancaires', '3e pilier', 'Robo-trading']);
 
   const steps = 5;
 

@@ -15,9 +15,10 @@ import { createId } from '@/utils/id';
 import { daysAgoIso, monthKey, nowIso } from '@/utils/date';
 
 /**
- * Deterministic demo dataset in CHF. Positions and liabilities are defined
- * explicitly; the valuation history is *derived* from the computed net worth
- * so the headline number and the chart always agree.
+ * Deterministic demo dataset in CHF, centred on real-world personal accounts:
+ * comptes bancaires, 3e pilier et un compte robo-trading (portefeuille géré).
+ * Pas de titres individuels. La valorisation d'historique est *dérivée* du
+ * patrimoine net calculé pour que le chiffre du cockpit et la courbe coïncident.
  */
 export function buildDemoData(): AppData {
   const now = nowIso();
@@ -26,63 +27,31 @@ export function buildDemoData(): AppData {
   const accounts: AppData['accounts'] = [
     account('acc-checking', 'Compte courant', 'bank', 'CHF', 'Banque cantonale'),
     account('acc-savings', 'Épargne', 'bank', 'CHF', 'Banque cantonale'),
-    account('acc-broker', 'Portefeuille titres', 'brokerage', 'CHF', 'Courtier'),
-    account('acc-crypto', 'Crypto', 'crypto', 'USD', 'Exchange'),
     account('acc-pension', '3e pilier', 'pension', 'CHF', 'Assurance'),
-    account('acc-property', 'Immobilier', 'real_estate', 'CHF'),
+    account('acc-robo', 'Robo-trading', 'brokerage', 'CHF', 'Robo-advisor'),
   ];
 
   const assets: Asset[] = [
     manualAsset('ast-cash-chf', 'Liquidités CHF', 'cash', 'CHF'),
     manualAsset('ast-savings', 'Épargne CHF', 'cash', 'CHF'),
-    marketAsset('ast-nesn', 'Nestlé', 'NESN', 'equity', 'CHF'),
-    marketAsset('ast-vwrl', 'FTSE All-World ETF', 'VWRL', 'etf', 'USD'),
-    marketAsset('ast-fund', 'Fonds obligataire CHF', 'FNDCHF', 'fund', 'CHF'),
-    marketAsset('ast-btc', 'Bitcoin', 'BTC', 'crypto', 'USD'),
-    marketAsset('ast-eth', 'Ethereum', 'ETH', 'crypto', 'USD'),
     manualAsset('ast-3p', '3e pilier — fonds', 'pension', 'CHF'),
-    manualAsset('ast-flat', 'Appartement', 'real_estate', 'CHF'),
+    marketAsset('ast-robo', 'Portefeuille géré', undefined, 'fund', 'CHF'),
   ];
 
   const positions: Position[] = [
-    manualPosition('acc-checking', 'ast-cash-chf', 8392.5),
+    manualPosition('acc-checking', 'ast-cash-chf', 8500),
     manualPosition('acc-savings', 'ast-savings', 24000),
-    marketPosition('acc-broker', 'ast-nesn', '120', 95.0),
-    marketPosition('acc-broker', 'ast-vwrl', '60', 105.0, 'USD'),
-    marketPosition('acc-broker', 'ast-fund', '200', 40.0),
-    marketPosition('acc-crypto', 'ast-btc', '0.25', 38000, 'USD'),
-    marketPosition('acc-crypto', 'ast-eth', '2', 2200, 'USD'),
-    manualPosition('acc-pension', 'ast-3p', 57500),
-    manualPosition('acc-property', 'ast-flat', 182000),
+    manualPosition('acc-pension', 'ast-3p', 58000),
+    // Compte robo : capital investi (coût) + valeur actuelle (via prix indicatif).
+    roboPosition('acc-robo', 'ast-robo', 30000),
   ];
 
-  const liabilities: AppData['liabilities'] = [
-    {
-      id: 'lia-mortgage',
-      name: 'Hypothèque',
-      kind: 'mortgage',
-      principalMinor: 12000000, // 120'000 CHF
-      currency: 'CHF',
-      interestRateBps: 145,
-      linkedAssetId: 'ast-flat',
-      isArchived: false,
-    },
-    {
-      id: 'lia-card',
-      name: 'Carte de crédit',
-      kind: 'credit_card',
-      principalMinor: 184000, // 1'840 CHF
-      currency: 'CHF',
-      isArchived: false,
-    },
-  ];
+  // Aucun passif dans ce jeu simplifié (l'ajout reste possible via le bouton +).
+  const liabilities: AppData['liabilities'] = [];
 
   const quotes: AppData['quotes'] = [
-    quote('ast-nesn', 108.5, 'CHF'),
-    quote('ast-vwrl', 118.2, 'USD'),
-    quote('ast-fund', 44.5, 'CHF'),
-    quote('ast-btc', 61000, 'USD'),
-    quote('ast-eth', 3050, 'USD'),
+    // Valeur actuelle du portefeuille géré (indicatif).
+    quote('ast-robo', 34200, 'CHF'),
   ];
 
   const fxRates: AppData['fxRates'] = [
@@ -136,14 +105,25 @@ export function buildDemoData(): AppData {
       isActive: true,
     },
     {
-      id: 'rec-subs',
-      label: 'Abonnements',
+      id: 'rec-3p',
+      label: 'Versement 3e pilier',
       type: 'expense',
-      amountMinor: 8900,
+      amountMinor: 58800,
       currency: 'CHF',
-      categoryId: 'cat-subs',
+      categoryId: undefined,
       frequency: 'monthly',
-      nextDate: daysAgoIso(-8),
+      nextDate: daysAgoIso(-12),
+      isActive: true,
+    },
+    {
+      id: 'rec-robo',
+      label: 'Versement robo-trading',
+      type: 'expense',
+      amountMinor: 50000,
+      currency: 'CHF',
+      categoryId: undefined,
+      frequency: 'monthly',
+      nextDate: daysAgoIso(-9),
       isActive: true,
     },
   ];
@@ -218,7 +198,7 @@ function manualAsset(id: string, name: string, assetClass: Asset['assetClass'], 
 function marketAsset(
   id: string,
   name: string,
-  symbol: string,
+  symbol: string | undefined,
   assetClass: Asset['assetClass'],
   currency: string,
 ): Asset {
@@ -246,20 +226,15 @@ function manualPosition(accountId: string, assetId: string, valueMajor: number):
   };
 }
 
-function marketPosition(
-  accountId: string,
-  assetId: string,
-  quantity: string,
-  avgCostMajor: number,
-  currency = 'CHF',
-): Position {
+/** A managed account: one unit whose average cost is the capital invested. */
+function roboPosition(accountId: string, assetId: string, investedMajor: number): Position {
   return {
     id: createId('pos'),
     accountId,
     assetId,
-    quantityDecimal: quantity,
-    averageCostMinor: Math.round(avgCostMajor * 100),
-    averageCostCurrency: currency,
+    quantityDecimal: '1',
+    averageCostMinor: Math.round(investedMajor * 100),
+    averageCostCurrency: 'CHF',
     isArchived: false,
     openedAt: daysAgoIso(300),
   };
@@ -282,7 +257,7 @@ function budget(categoryId: string, limitMinor: number): AppData['budgets'][numb
   return { id: createId('bud'), month: monthKey(), categoryId, limitMinor, currency: 'CHF' };
 }
 
-/** Three months of income + varied expenses. */
+/** Three months of income + varied expenses (comptes bancaires). */
 function buildTransactions(): Transaction[] {
   const txs: Transaction[] = [];
   const expensePlan: { cat: string; label: string; amount: number; day: number }[] = [
@@ -298,7 +273,6 @@ function buildTransactions(): Transaction[] {
   ];
 
   for (let m = 0; m < 3; m++) {
-    const salaryDay = 25;
     txs.push({
       id: createId('tx'),
       accountId: 'acc-checking',
@@ -306,7 +280,7 @@ function buildTransactions(): Transaction[] {
       amountMinor: 720000,
       currency: 'CHF',
       categoryId: 'cat-salary',
-      occurredAt: monthDayIso(m, salaryDay),
+      occurredAt: monthDayIso(m, 25),
       note: 'Salaire',
     });
     for (const e of expensePlan) {
@@ -320,19 +294,6 @@ function buildTransactions(): Transaction[] {
         categoryId: e.cat,
         occurredAt: monthDayIso(m, e.day),
         note: e.label,
-      });
-    }
-    // A dividend every other month.
-    if (m % 2 === 0) {
-      txs.push({
-        id: createId('tx'),
-        accountId: 'acc-broker',
-        type: 'dividend',
-        assetId: 'ast-nesn',
-        amountMinor: 8400,
-        currency: 'CHF',
-        occurredAt: monthDayIso(m, 16),
-        note: 'Dividende Nestlé',
       });
     }
   }
@@ -357,7 +318,6 @@ function buildSnapshots(
 ): ValuationSnapshot[] {
   const months = 12;
   const snapshots: ValuationSnapshot[] = [];
-  // Deterministic pseudo-noise so the curve looks organic but stable.
   const noise = [0, -320, 410, -180, 560, -90, 300, -420, 250, -140, 380, -260];
   const startFactor = 0.82; // 12 months ago ≈ 82% of today
   for (let i = 0; i < months; i++) {
