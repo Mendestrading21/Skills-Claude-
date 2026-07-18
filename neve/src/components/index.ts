@@ -3,6 +3,8 @@ export type { TextProps, TextVariant } from './Text';
 export { Screen } from './Screen';
 export { ScreenBackground } from './ScreenBackground';
 export { GlassCard } from './GlassCard';
+export { Avatar } from './Avatar';
+export { AnimatedEntrance } from './AnimatedEntrance';
 export { MetricCard } from './MetricCard';
 export { SectionHeader } from './SectionHeader';
 export { AmountText } from './AmountText';

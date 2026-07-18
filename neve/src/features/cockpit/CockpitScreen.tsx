@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import {
   AllocationRing,
   AmountText,
+  AnimatedEntrance,
   AppHeader,
   Button,
   GlassCard,
@@ -23,6 +24,7 @@ import { formatMinor, formatPercent, relativeChange } from '@/domain/money';
 import { APP_NAME } from '@/config/app';
 import { t } from '@/i18n';
 import { categoryColors, useTheme } from '@/theme';
+import { assetClassEmoji, greeting } from '@/utils/emoji';
 import {
   selectAllocation,
   selectBudgetTotals,
@@ -36,6 +38,7 @@ import {
   useAppStore,
 } from '@/store';
 import type { RangeKey } from '@/utils/date';
+import type { AssetClass } from '@/types';
 
 const RANGE_OPTIONS: { value: RangeKey; label: string }[] = [
   { value: '1M', label: '1M' },
@@ -67,6 +70,7 @@ export function CockpitScreen() {
 
   const cashFlowTrend = relativeChange(cashFlow.netMinor, prevCashFlow.netMinor);
   const isEmpty = data.accounts.length === 0 && data.positions.length === 0;
+  const hello = greeting();
 
   if (isEmpty) {
     return (
@@ -91,7 +95,7 @@ export function CockpitScreen() {
     <Screen bottomInset={110}>
       <AppHeader
         title={APP_NAME}
-        subtitle={t.cockpit.subtitle}
+        subtitle={`${hello.emoji} ${hello.text}`}
         showLogo
         actions={[
           { icon: 'assistant', label: t.assistant.title, onPress: () => router.push('/assistant') },
@@ -100,29 +104,32 @@ export function CockpitScreen() {
       />
 
       {/* Net worth hero */}
-      <GlassCard strong radius="panel" padding="lg" style={styles.hero}>
-        <View style={styles.heroTop}>
-          <Text variant="micro" tone="muted">
-            {t.metrics.netWorth}
-          </Text>
-          <PrivacyBadge label="Sur cet appareil" tone="info" />
-        </View>
-        <AmountText minor={nw.netWorthMinor} currency={base} variant="display" style={{ marginTop: 6 }} />
-        <View style={styles.heroTrend}>
-          <TrendBadge ratio={perf.ratio} />
-          <Text variant="meta" tone="secondary">
-            {formatMinor(perf.absoluteMinor, base, { signed: true })} · {rangeLabel(range)}
-          </Text>
-        </View>
+      <AnimatedEntrance>
+        <GlassCard strong radius="panel" padding="lg" glow="#FF8A1F" style={styles.hero}>
+          <View style={styles.heroTop}>
+            <Text variant="micro" tone="muted">
+              💎 {t.metrics.netWorth}
+            </Text>
+            <PrivacyBadge label="Sur cet appareil" tone="info" />
+          </View>
+          <AmountText minor={nw.netWorthMinor} currency={base} variant="display" style={{ marginTop: 6 }} />
+          <View style={styles.heroTrend}>
+            <TrendBadge ratio={perf.ratio} />
+            <Text variant="meta" tone="secondary">
+              {formatMinor(perf.absoluteMinor, base, { signed: true })} · {rangeLabel(range)}
+            </Text>
+          </View>
 
-        <View style={[styles.statRow, { borderTopColor: theme.colors.border }]}>
-          <MiniStat label={t.metrics.assets} value={formatMinor(nw.assetsMinor, base, { compact: true })} />
-          <MiniStat label={t.metrics.liabilities} value={formatMinor(nw.liabilitiesMinor, base, { compact: true })} />
-          <MiniStat label={t.metrics.liquidity} value={formatMinor(nw.liquidityMinor, base, { compact: true })} />
-        </View>
-      </GlassCard>
+          <View style={[styles.statRow, { borderTopColor: theme.colors.border }]}>
+            <MiniStat label={`💰 ${t.metrics.assets}`} value={formatMinor(nw.assetsMinor, base, { compact: true })} />
+            <MiniStat label={`💳 ${t.metrics.liabilities}`} value={formatMinor(nw.liabilitiesMinor, base, { compact: true })} />
+            <MiniStat label={`💧 ${t.metrics.liquidity}`} value={formatMinor(nw.liquidityMinor, base, { compact: true })} />
+          </View>
+        </GlassCard>
+      </AnimatedEntrance>
 
       {/* History */}
+      <AnimatedEntrance delay={80}>
       <GlassCard style={styles.block}>
         <View style={styles.historyHeader}>
           <Text variant="sectionTitle">{t.cockpit.history}</Text>
@@ -133,12 +140,14 @@ export function CockpitScreen() {
         </View>
         <LineChart points={series} currency={base} />
       </GlassCard>
+      </AnimatedEntrance>
 
       {/* Metric grid */}
+      <AnimatedEntrance delay={140}>
       <View style={styles.grid}>
         <View style={styles.gridItem}>
           <MetricCard
-            label={t.metrics.investments}
+            label={`📈 ${t.metrics.investments}`}
             value={<AmountText minor={nw.investmentsMinor} currency={base} variant="cardValue" />}
             caption={sparkValues.length > 1 ? undefined : t.common.toVerify}
             trend={sparkValues.length > 1 ? <Sparkline values={sparkValues} width={90} height={28} /> : undefined}
@@ -146,7 +155,7 @@ export function CockpitScreen() {
         </View>
         <View style={styles.gridItem}>
           <MetricCard
-            label={t.metrics.performance}
+            label={`🚀 ${t.metrics.performance}`}
             value={
               <Text
                 variant="cardValue"
@@ -161,7 +170,7 @@ export function CockpitScreen() {
         </View>
         <View style={styles.gridItem}>
           <MetricCard
-            label={t.metrics.monthlyCashFlow}
+            label={`💸 ${t.metrics.monthlyCashFlow}`}
             value={<AmountText minor={cashFlow.netMinor} currency={base} variant="cardValue" colorBySign />}
             trend={<TrendBadge ratio={cashFlowTrend} size="sm" />}
             caption={t.budget.vsPrevious}
@@ -169,7 +178,7 @@ export function CockpitScreen() {
         </View>
         <View style={styles.gridItem}>
           <MetricCard
-            label={t.metrics.budgetRemaining}
+            label={`🎯 ${t.metrics.budgetRemaining}`}
             value={<AmountText minor={budgetTotals.remainingMinor} currency={base} variant="cardValue" />}
             caption={
               budgetTotals.limitMinor > 0 ? (
@@ -183,11 +192,13 @@ export function CockpitScreen() {
           />
         </View>
       </View>
+      </AnimatedEntrance>
 
       {/* Allocation */}
       {allocation.length > 0 && (
+        <AnimatedEntrance delay={200}>
         <GlassCard style={styles.block}>
-          <SectionHeader title={t.cockpit.allocationTitle} actionLabel={t.common.seeAll} onAction={() => router.push('/(tabs)/portfolio')} />
+          <SectionHeader title={`🧭 ${t.cockpit.allocationTitle}`} actionLabel={t.common.seeAll} onAction={() => router.push('/(tabs)/portfolio')} />
           <View style={styles.allocationRow}>
             <AllocationRing
               slices={allocation.map((a) => ({ key: a.key, label: a.label, ratio: a.ratio }))}
@@ -199,7 +210,7 @@ export function CockpitScreen() {
                 <View key={slice.key} style={styles.legendRow}>
                   <View style={[styles.legendDot, { backgroundColor: categoryColors[i % categoryColors.length] }]} />
                   <Text variant="meta" style={{ flex: 1 }} numberOfLines={1}>
-                    {slice.label}
+                    {assetClassEmoji(slice.key as AssetClass)} {slice.label}
                   </Text>
                   <Text variant="meta" tone="secondary" tabular>
                     {formatPercent(slice.ratio, 0)}
@@ -209,11 +220,13 @@ export function CockpitScreen() {
             </View>
           </View>
         </GlassCard>
+        </AnimatedEntrance>
       )}
 
       {/* Priority actions */}
+      <AnimatedEntrance delay={260}>
       <GlassCard style={styles.block}>
-        <SectionHeader title={t.cockpit.priorityActions} />
+        <SectionHeader title={`🔔 ${t.cockpit.priorityActions}`} />
         {alerts.length === 0 ? (
           <View style={styles.okRow}>
             <View style={[styles.okDot, { backgroundColor: theme.colors.positive }]} />
@@ -249,14 +262,17 @@ export function CockpitScreen() {
           </View>
         )}
       </GlassCard>
+      </AnimatedEntrance>
 
       {/* Weekly brief */}
-      <GlassCard style={styles.block}>
-        <SectionHeader title={t.cockpit.weeklyBrief} />
+      <AnimatedEntrance delay={320}>
+      <GlassCard style={styles.block} glow="#58A6FF">
+        <SectionHeader title={`📊 ${t.cockpit.weeklyBrief}`} />
         <Text variant="body" tone="secondary" style={{ lineHeight: 22 }}>
           {buildBrief(nw.netWorthMinor, perf.ratio, cashFlow.netMinor, base)}
         </Text>
       </GlassCard>
+      </AnimatedEntrance>
     </Screen>
   );
 }

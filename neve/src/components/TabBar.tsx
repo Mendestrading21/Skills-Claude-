@@ -67,7 +67,14 @@ export function TabBar({ state, navigation }: TabBarProps) {
                   accessibilityLabel={meta.label}
                   style={styles.tab}
                 >
-                  <Icon name={meta.icon} size={22} color={color} strokeWidth={focused ? 2.4 : 2} />
+                  <View
+                    style={[
+                      styles.iconPill,
+                      focused && { backgroundColor: 'rgba(255,138,31,0.14)', borderColor: 'rgba(255,138,31,0.30)' },
+                    ]}
+                  >
+                    <Icon name={meta.icon} size={21} color={color} strokeWidth={focused ? 2.4 : 2} />
+                  </View>
                   <Text variant="micro" style={{ color, textTransform: 'none', letterSpacing: 0 }}>
                     {meta.label}
                   </Text>
@@ -98,4 +105,11 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', paddingVertical: 8 },
   tab: { flex: 1, alignItems: 'center', gap: 3, paddingVertical: 4 },
+  iconPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'transparent',
+  },
 });

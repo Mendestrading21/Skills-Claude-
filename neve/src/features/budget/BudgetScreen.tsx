@@ -3,7 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 import {
   AmountText,
+  AnimatedEntrance,
   AppHeader,
+  Avatar,
   Button,
   EmptyState,
   GlassCard,
@@ -18,6 +20,7 @@ import {
 import { formatMinor, formatPercent, relativeChange } from '@/domain/money';
 import { t } from '@/i18n';
 import { formatDateFr } from '@/utils/date';
+import { categoryEmoji } from '@/utils/emoji';
 import {
   selectBudgetProgress,
   selectBudgetTotals,
@@ -45,10 +48,11 @@ export function BudgetScreen() {
       <AppHeader title={t.budget.title} subtitle={t.budget.subtitle} />
 
       {/* Cash-flow */}
-      <GlassCard strong radius="panel" padding="lg" style={styles.summary}>
+      <AnimatedEntrance>
+      <GlassCard strong radius="panel" padding="lg" glow="#31D17C" style={styles.summary}>
         <View style={styles.cashRow}>
-          <Cash label={t.budget.income} minor={cash.incomeMinor} currency={base} tone="positive" />
-          <Cash label={t.budget.expenses} minor={cash.expenseMinor} currency={base} tone="negative" />
+          <Cash label={`📈 ${t.budget.income}`} minor={cash.incomeMinor} currency={base} tone="positive" />
+          <Cash label={`📉 ${t.budget.expenses}`} minor={cash.expenseMinor} currency={base} tone="negative" />
         </View>
         <RowDivider />
         <View style={styles.netRow}>
@@ -66,6 +70,7 @@ export function BudgetScreen() {
           </View>
         </View>
       </GlassCard>
+      </AnimatedEntrance>
 
       {/* Budgets */}
       <SectionHeader
@@ -94,11 +99,14 @@ export function BudgetScreen() {
             <ProgressBar ratio={totals.ratio} over={totals.ratio > 1} height={10} />
           </View>
           {budgets.map((b, i) => (
-            <View key={b.budgetId} style={{ marginBottom: i === budgets.length - 1 ? 0 : 14 }}>
+            <View key={b.budgetId} style={{ marginBottom: i === budgets.length - 1 ? 0 : 16 }}>
               <View style={styles.budgetRow}>
-                <Text variant="body" weight="medium">
-                  {b.categoryName}
-                </Text>
+                <View style={styles.budgetLabel}>
+                  <Avatar emoji={categoryEmoji(b.categoryName, 'expense')} colorIndex={b.colorIndex} size={34} />
+                  <Text variant="body" weight="medium" numberOfLines={1} style={{ flexShrink: 1 }}>
+                    {b.categoryName}
+                  </Text>
+                </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <AmountText minor={b.spentMinor} currency={b.currency} variant="meta" tone={b.isOver ? 'negative' : 'secondary'} />
                   <Text variant="meta" tone="muted">
@@ -107,7 +115,7 @@ export function BudgetScreen() {
                   {b.isOver ? <TrendBadge ratio={null} size="sm" /> : null}
                 </View>
               </View>
-              <View style={{ marginTop: 6 }}>
+              <View style={{ marginTop: 8, marginLeft: 46 }}>
                 <ProgressBar ratio={b.ratio} colorIndex={b.colorIndex} over={b.isOver} />
               </View>
             </View>
@@ -126,7 +134,13 @@ export function BudgetScreen() {
                 <ListRow
                   title={r.label}
                   subtitle={`${FREQ_LABEL[r.frequency]} · ${formatDateFr(r.nextDate)}`}
-                  leading={<View style={[styles.dot, { backgroundColor: r.type === 'income' ? '#31D17C' : '#FF8A1F' }]} />}
+                  leading={
+                    <Avatar
+                      emoji={r.type === 'income' ? '💰' : categoryEmoji(r.label, 'expense')}
+                      color={r.type === 'income' ? '#31D17C' : '#FF8A1F'}
+                      size={38}
+                    />
+                  }
                   right={
                     <AmountText
                       minor={r.type === 'income' ? r.amountMinor : -r.amountMinor}
@@ -150,16 +164,19 @@ export function BudgetScreen() {
             {data.goals.map((g, i) => {
               const ratio = g.targetMinor === 0 ? 0 : g.currentMinor / g.targetMinor;
               return (
-                <View key={g.id} style={{ marginBottom: i === data.goals.length - 1 ? 0 : 16 }}>
+                <View key={g.id} style={{ marginBottom: i === data.goals.length - 1 ? 0 : 18 }}>
                   <View style={styles.budgetRow}>
-                    <Text variant="body" weight="medium">
-                      {g.name}
-                    </Text>
+                    <View style={styles.budgetLabel}>
+                      <Avatar emoji={goalEmoji(g.name)} colorIndex={i + 2} size={34} />
+                      <Text variant="body" weight="medium" numberOfLines={1} style={{ flexShrink: 1 }}>
+                        {g.name}
+                      </Text>
+                    </View>
                     <Text variant="meta" tone="secondary" tabular>
                       {formatMinor(g.currentMinor, g.currency, { compact: true })} / {formatMinor(g.targetMinor, g.currency, { compact: true })}
                     </Text>
                   </View>
-                  <View style={{ marginTop: 6, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <View style={{ marginTop: 8, marginLeft: 46, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <View style={{ flex: 1 }}>
                       <ProgressBar ratio={ratio} colorIndex={i + 2} />
                     </View>
@@ -188,6 +205,15 @@ const FREQ_LABEL: Record<string, string> = {
   yearly: 'Annuel',
 };
 
+function goalEmoji(name: string): string {
+  if (/urgence|fonds|secours/i.test(name)) return '🛟';
+  if (/voyage|vacance|trip/i.test(name)) return '✈️';
+  if (/maison|appart|immo/i.test(name)) return '🏠';
+  if (/voiture|auto/i.test(name)) return '🚗';
+  if (/retraite|pension/i.test(name)) return '🏖️';
+  return '🎯';
+}
+
 function Cash({ label, minor, currency, tone }: { label: string; minor: number; currency: string; tone: 'positive' | 'negative' }) {
   return (
     <View style={{ flex: 1 }}>
@@ -205,6 +231,6 @@ const styles = StyleSheet.create({
   netRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
   block: { marginBottom: 16 },
   totalsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  budgetRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  dot: { width: 10, height: 10, borderRadius: 5 },
+  budgetRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  budgetLabel: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
 });

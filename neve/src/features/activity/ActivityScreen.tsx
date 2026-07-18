@@ -3,7 +3,9 @@ import { StyleSheet, View } from 'react-native';
 
 import {
   AmountText,
+  AnimatedEntrance,
   AppHeader,
+  Avatar,
   EmptyState,
   FilterChips,
   GlassCard,
@@ -16,6 +18,7 @@ import {
 import { t } from '@/i18n';
 import { formatDateFr } from '@/utils/date';
 import { selectActivity, useAppStore } from '@/store';
+import { categoryEmoji } from '@/utils/emoji';
 
 type TypeFilter = 'all' | 'income' | 'expense' | 'dividend' | 'buy' | 'sell';
 type PeriodFilter = 'all' | '30' | '90';
@@ -73,14 +76,21 @@ export function ActivityScreen() {
       {filtered.length === 0 ? (
         <EmptyState title={t.activity.empty} body={t.activity.emptyHint} />
       ) : (
+        <AnimatedEntrance>
         <GlassCard style={styles.block} padding="sm">
-          {filtered.map((item, i) => (
+          {filtered.map((item, i) => {
+            const cat = data.categories.find((c) => c.id === item.categoryId);
+            const emoji =
+              item.direction === 1 && !cat
+                ? '💰'
+                : categoryEmoji(cat?.name, item.direction === 1 ? 'income' : 'expense');
+            return (
             <View key={item.id}>
               {i > 0 && <RowDivider />}
               <ListRow
                 title={item.title}
                 subtitle={item.subtitle}
-                leading={<View style={[styles.dot, { backgroundColor: dotColor(item.direction) }]} />}
+                leading={<Avatar emoji={emoji} color={dotColor(item.direction)} size={38} />}
                 right={
                   <View style={{ alignItems: 'flex-end' }}>
                     {item.amountMinor != null && item.currency ? (
@@ -99,8 +109,10 @@ export function ActivityScreen() {
                 }
               />
             </View>
-          ))}
+            );
+          })}
         </GlassCard>
+        </AnimatedEntrance>
       )}
     </Screen>
   );
@@ -114,5 +126,4 @@ function dotColor(direction: 1 | -1 | 0): string {
 
 const styles = StyleSheet.create({
   block: { marginBottom: 16 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
 });

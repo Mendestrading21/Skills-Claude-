@@ -5,7 +5,9 @@ import { useRouter } from 'expo-router';
 import {
   AllocationRing,
   AmountText,
+  AnimatedEntrance,
   AppHeader,
+  Avatar,
   EmptyState,
   GlassCard,
   ListRow,
@@ -19,6 +21,7 @@ import {
   Text,
   TrendBadge,
 } from '@/components';
+import { assetClassEmoji } from '@/utils/emoji';
 import {
   allocationByClass,
   currencyExposure,
@@ -84,21 +87,23 @@ export function PortfolioScreen() {
     <Screen bottomInset={110}>
       <AppHeader title={t.portfolio.title} subtitle={t.portfolio.subtitle} />
 
-      <GlassCard strong radius="panel" padding="lg" style={styles.summary}>
-        <View style={styles.summaryTop}>
-          <Text variant="micro" tone="muted">
-            {t.metrics.currentValue}
-          </Text>
-          {summary.hasStale ? <PrivacyBadge label="Prix indicatif" tone="muted" /> : null}
-        </View>
-        <AmountText minor={summary.totalValueMinor} currency={base} variant="display" style={{ marginTop: 4 }} />
-        <View style={styles.summaryTrend}>
-          <TrendBadge ratio={summary.totalGainRatio} />
-          <Text variant="meta" tone="secondary">
-            {formatMinor(summary.totalGainMinor, base, { signed: true })} · {t.metrics.unrealizedGain}
-          </Text>
-        </View>
-      </GlassCard>
+      <AnimatedEntrance>
+        <GlassCard strong radius="panel" padding="lg" glow="#FF8A1F" style={styles.summary}>
+          <View style={styles.summaryTop}>
+            <Text variant="micro" tone="muted">
+              📊 {t.metrics.currentValue}
+            </Text>
+            {summary.hasStale ? <PrivacyBadge label="Prix indicatif" tone="muted" /> : null}
+          </View>
+          <AmountText minor={summary.totalValueMinor} currency={base} variant="display" style={{ marginTop: 4 }} />
+          <View style={styles.summaryTrend}>
+            <TrendBadge ratio={summary.totalGainRatio} />
+            <Text variant="meta" tone="secondary">
+              {formatMinor(summary.totalGainMinor, base, { signed: true })} · {t.metrics.unrealizedGain}
+            </Text>
+          </View>
+        </GlassCard>
+      </AnimatedEntrance>
 
       <View style={styles.grid}>
         <View style={styles.gridItem}>
@@ -160,17 +165,20 @@ export function PortfolioScreen() {
             />
           </View>
           <View style={{ marginTop: 12 }}>
-            {shownContributors.map((c, i) => (
+            {shownContributors.map((c, i) => {
+              const asset = data.assets.find((a) => a.id === c.assetId);
+              return (
               <View key={c.assetId}>
                 {i > 0 && <RowDivider />}
                 <ListRow
                   title={c.label}
                   subtitle={c.gainRatio == null ? t.common.toVerify : formatPercent(c.gainRatio)}
-                  colorIndex={i}
+                  leading={<Avatar emoji={assetClassEmoji(asset?.assetClass ?? 'other')} colorIndex={i} size={38} />}
                   right={<AmountText minor={c.gainMinor} currency={base} variant="cardTitle" colorBySign signed />}
                 />
               </View>
-            ))}
+              );
+            })}
           </View>
         </GlassCard>
       )}
@@ -208,7 +216,7 @@ export function PortfolioScreen() {
               <ListRow
                 title={asset?.name ?? v.assetId}
                 subtitle={[asset?.symbol, v.priceSource ?? undefined].filter(Boolean).join(' · ') || undefined}
-                colorIndex={i}
+                leading={<Avatar emoji={assetClassEmoji(asset?.assetClass ?? 'other')} colorIndex={i} size={38} />}
                 showChevron
                 onPress={() => router.push(`/position/${v.positionId}`)}
                 right={
