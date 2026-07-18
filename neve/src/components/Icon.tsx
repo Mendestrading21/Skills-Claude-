@@ -20,6 +20,8 @@ export type IconName =
   | 'arrowDown'
   | 'download'
   | 'upload'
+  | 'refresh'
+  | 'target'
   | 'trash'
   | 'lock'
   | 'shield'
@@ -95,6 +97,19 @@ export function Icon({ name, size = 22, color = palette.textSecondary, strokeWid
       {name === 'arrowDown' && <Path d="M12 5v14M6 13l6 6 6-6" {...common} />}
       {name === 'download' && <Path d="M12 3v12M8 11l4 4 4-4M4 21h16" {...common} />}
       {name === 'upload' && <Path d="M12 21V9M8 13l4-4 4 4M4 3h16" {...common} />}
+      {name === 'refresh' && (
+        <>
+          <Path d="M21 12a9 9 0 1 1-2.64-6.36" {...common} />
+          <Path d="M21 3v6h-6" {...common} />
+        </>
+      )}
+      {name === 'target' && (
+        <>
+          <Circle cx={12} cy={12} r={9} {...common} />
+          <Circle cx={12} cy={12} r={5} {...common} />
+          <Circle cx={12} cy={12} r={1.4} fill={color} stroke="none" />
+        </>
+      )}
       {name === 'trash' && <Path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" {...common} />}
       {name === 'lock' && (
         <>

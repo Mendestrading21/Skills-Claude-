@@ -167,6 +167,7 @@ const preferences = z.object({
   reducedTransparency: z.boolean(),
   appLockEnabled: z.boolean(),
   onboarded: z.boolean(),
+  netWorthTargetMinor: z.number().int().optional(),
 });
 
 export const appDataSchema = z.object({

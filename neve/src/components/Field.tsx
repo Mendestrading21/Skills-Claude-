@@ -16,9 +16,11 @@ export function Field({ label, error, hint, right, style, ...rest }: FieldProps)
   const theme = useTheme();
   return (
     <View style={styles.wrap}>
-      <Text variant="micro" tone="muted">
-        {label}
-      </Text>
+      {label ? (
+        <Text variant="micro" tone="muted">
+          {label}
+        </Text>
+      ) : null}
       <View
         style={[
           styles.inputWrap,

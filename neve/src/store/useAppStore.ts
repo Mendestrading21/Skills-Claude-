@@ -19,6 +19,7 @@ import type {
 } from '@/types';
 import { createId } from '@/utils/id';
 import { currentMonthKey, nowIso } from '@/utils/date';
+import { selectNetWorth } from './selectors';
 
 type NewAccount = Omit<Account, 'id' | 'isArchived' | 'createdAt' | 'updatedAt'>;
 type NewAsset = Omit<Asset, 'id'>;
@@ -69,6 +70,8 @@ export type AppState = {
 
   captureSnapshot: (snapshot: Omit<ValuationSnapshot, 'id'>) => void;
   upsertQuote: (assetId: string, priceMinor: number, currency: string, source?: string) => void;
+  /** Record today's net worth as a history point (one per day, deduped). */
+  recordSnapshot: () => void;
 };
 
 /** Persist current data without blocking the UI. */
@@ -284,6 +287,25 @@ export const useAppStore = create<AppState>((set, get) => {
           { assetId, priceMinor, currency, source, asOf: ts, fetchedAt: ts, isStale: false },
         ],
       }));
+    },
+
+    recordSnapshot() {
+      mutate((d) => {
+        const nw = selectNetWorth(d);
+        const iso = nowIso();
+        const today = iso.slice(0, 10);
+        const snapshot: ValuationSnapshot = {
+          id: createId('snap'),
+          capturedAt: iso,
+          baseCurrency: d.preferences.baseCurrency,
+          assetsMinor: nw.assetsMinor,
+          liabilitiesMinor: nw.liabilitiesMinor,
+          netWorthMinor: nw.netWorthMinor,
+          breakdown: Object.fromEntries(nw.breakdown.map((b) => [b.key, b.valueMinor])),
+        };
+        const withoutToday = d.snapshots.filter((s) => s.capturedAt.slice(0, 10) !== today);
+        return { ...d, snapshots: [...withoutToday, snapshot] };
+      });
     },
   };
 });

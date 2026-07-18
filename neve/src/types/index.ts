@@ -182,6 +182,8 @@ export type UserPreferences = {
   reducedTransparency: boolean;
   appLockEnabled: boolean;
   onboarded: boolean;
+  /** Optional net-worth objective in minor units (0/undefined = unset). */
+  netWorthTargetMinor?: number;
 };
 
 /** The full persisted document. */

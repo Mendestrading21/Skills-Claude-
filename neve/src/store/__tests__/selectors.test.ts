@@ -5,6 +5,8 @@ import {
   selectBudgetProgress,
   selectCashFlow,
   selectNetWorth,
+  selectNetWorthGoal,
+  selectSavingsRate,
   selectSeries,
 } from '../selectors';
 
@@ -46,5 +48,27 @@ describe('selectors — demo data', () => {
     const alloc = selectAllocation(demo);
     const total = alloc.reduce((s, a) => s + a.ratio, 0);
     expect(total).toBeCloseTo(1);
+  });
+
+  test('savings rate is a ratio of income', () => {
+    const rate = selectSavingsRate(demo);
+    expect(rate).not.toBeNull();
+    expect(rate as number).toBeLessThanOrEqual(1);
+  });
+
+  test('net-worth goal reports progress toward the target', () => {
+    const goal = selectNetWorthGoal(demo);
+    expect(goal).not.toBeNull();
+    if (goal) {
+      expect(goal.targetMinor).toBeGreaterThan(0);
+      expect(goal.currentMinor).toBe(selectNetWorth(demo).netWorthMinor);
+      expect(goal.remainingMinor).toBe(Math.max(0, goal.targetMinor - goal.currentMinor));
+      expect(goal.ratio).toBeCloseTo(goal.currentMinor / goal.targetMinor);
+    }
+  });
+
+  test('no goal when target is unset', () => {
+    const noGoal = selectNetWorthGoal(createEmptyState());
+    expect(noGoal).toBeNull();
   });
 });

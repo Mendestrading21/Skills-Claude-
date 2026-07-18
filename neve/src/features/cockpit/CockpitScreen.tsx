@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import {
@@ -9,6 +9,7 @@ import {
   AppHeader,
   Button,
   GlassCard,
+  Icon,
   LineChart,
   MetricCard,
   PrivacyBadge,
@@ -30,13 +31,16 @@ import {
   selectBudgetTotals,
   selectCashFlow,
   selectNetWorth,
+  selectNetWorthGoal,
   selectPerformance,
   selectPortfolioSummary,
   selectPreviousCashFlow,
   selectPriorityAlerts,
+  selectSavingsRate,
   selectSeries,
   useAppStore,
 } from '@/store';
+import { useQuickAdd } from '@/features/forms/QuickAddProvider';
 import type { RangeKey } from '@/utils/date';
 import type { AssetClass } from '@/types';
 
@@ -66,8 +70,12 @@ export function CockpitScreen() {
   const portfolio = useMemo(() => selectPortfolioSummary(data), [data]);
   const budgetTotals = useMemo(() => selectBudgetTotals(data), [data]);
   const alerts = useMemo(() => selectPriorityAlerts(data), [data]);
+  const goal = useMemo(() => selectNetWorthGoal(data), [data]);
+  const savingsRate = useMemo(() => selectSavingsRate(data), [data]);
+  const monthChange = useMemo(() => selectPerformance(data, '1M'), [data]);
   const sparkValues = useMemo(() => data.snapshots.map((s) => s.netWorthMinor), [data.snapshots]);
 
+  const { open: openQuickAdd } = useQuickAdd();
   const cashFlowTrend = relativeChange(cashFlow.netMinor, prevCashFlow.netMinor);
   const isEmpty = data.accounts.length === 0 && data.positions.length === 0;
   const hello = greeting();
@@ -126,6 +134,65 @@ export function CockpitScreen() {
             <MiniStat label={`💧 ${t.metrics.liquidity}`} value={formatMinor(nw.liquidityMinor, base, { compact: true })} />
           </View>
         </GlassCard>
+      </AnimatedEntrance>
+
+      {/* Update balances CTA */}
+      <AnimatedEntrance delay={50}>
+        <Pressable
+          onPress={() => openQuickAdd('balances')}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.cta, { opacity: pressed ? 0.85 : 1 }]}
+        >
+          <GlassCard strong padding="md" radius="control" style={styles.ctaCard}>
+            <View style={styles.ctaLeft}>
+              <Icon name="refresh" size={20} color={theme.colors.accent} />
+              <Text variant="body" weight="semibold">
+                Mettre à jour mes soldes
+              </Text>
+            </View>
+            <Icon name="chevronRight" size={18} color={theme.colors.textMuted} />
+          </GlassCard>
+        </Pressable>
+      </AnimatedEntrance>
+
+      {/* Net worth goal */}
+      <AnimatedEntrance delay={65}>
+        <Pressable
+          onPress={() => openQuickAdd('goal')}
+          accessibilityRole="button"
+          style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+        >
+          <GlassCard style={styles.block} glow={goal ? '#31D17C' : undefined}>
+            {goal ? (
+              <>
+                <View style={styles.goalHead}>
+                  <Text variant="cardTitle">🎯 Objectif de patrimoine</Text>
+                  <Text variant="meta" tone="accent" weight="semibold" tabular>
+                    {formatPercent(goal.ratio, 0)}
+                  </Text>
+                </View>
+                <View style={{ marginTop: 10 }}>
+                  <ProgressBar ratio={goal.ratio} color={theme.colors.positive} height={10} />
+                </View>
+                <View style={styles.goalFoot}>
+                  <Text variant="meta" tone="secondary" tabular>
+                    {formatMinor(goal.currentMinor, base, { compact: true })} / {formatMinor(goal.targetMinor, base, { compact: true })}
+                  </Text>
+                  <Text variant="meta" tone="muted" tabular>
+                    Reste {formatMinor(goal.remainingMinor, base, { compact: true })}
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <View style={styles.goalEmpty}>
+                <Text variant="cardTitle">🎯 Définir un objectif</Text>
+                <Text variant="meta" tone="secondary" style={{ marginTop: 4 }}>
+                  Fixez un patrimoine net à atteindre et suivez votre progression.
+                </Text>
+              </View>
+            )}
+          </GlassCard>
+        </Pressable>
       </AnimatedEntrance>
 
       {/* History */}
@@ -189,6 +256,25 @@ export function CockpitScreen() {
                 t.budget.empty
               )
             }
+          />
+        </View>
+        <View style={styles.gridItem}>
+          <MetricCard
+            label="💰 Taux d’épargne"
+            value={
+              <Text variant="cardValue" tone={savingsRate == null ? 'muted' : savingsRate >= 0 ? 'positive' : 'negative'} tabular>
+                {savingsRate == null ? '—' : formatPercent(savingsRate, 0)}
+              </Text>
+            }
+            caption="ce mois"
+          />
+        </View>
+        <View style={styles.gridItem}>
+          <MetricCard
+            label="📅 Ce mois"
+            value={<AmountText minor={monthChange.absoluteMinor} currency={base} variant="cardValue" colorBySign signed compact />}
+            trend={<TrendBadge ratio={monthChange.ratio} size="sm" />}
+            caption="patrimoine net"
           />
         </View>
       </View>
@@ -322,4 +408,10 @@ const styles = StyleSheet.create({
   okDot: { width: 8, height: 8, borderRadius: 4 },
   alertRow: { flexDirection: 'row', gap: 12 },
   alertBar: { width: 3, borderRadius: 3 },
+  cta: { marginBottom: 16 },
+  ctaCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  ctaLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  goalHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  goalFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
+  goalEmpty: {},
 });

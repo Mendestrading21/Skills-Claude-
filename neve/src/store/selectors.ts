@@ -104,6 +104,32 @@ export function selectPerformance(data: AppData, range: RangeKey) {
   return seriesPerformance(selectSeries(data, range));
 }
 
+/** Savings rate = net cash-flow / income for the current month (null if no income). */
+export function selectSavingsRate(data: AppData): number | null {
+  const cf = selectCashFlow(data);
+  return cf.incomeMinor === 0 ? null : cf.netMinor / cf.incomeMinor;
+}
+
+export type NetWorthGoal = {
+  targetMinor: number;
+  currentMinor: number;
+  remainingMinor: number;
+  ratio: number;
+};
+
+/** Progress toward the optional net-worth objective, or null when unset. */
+export function selectNetWorthGoal(data: AppData): NetWorthGoal | null {
+  const target = data.preferences.netWorthTargetMinor ?? 0;
+  if (target <= 0) return null;
+  const current = selectNetWorth(data).netWorthMinor;
+  return {
+    targetMinor: target,
+    currentMinor: current,
+    remainingMinor: Math.max(0, target - current),
+    ratio: target === 0 ? 0 : current / target,
+  };
+}
+
 // --- Activity timeline ----------------------------------------------------
 
 export type ActivityKind = 'transaction' | 'valuation' | 'note';

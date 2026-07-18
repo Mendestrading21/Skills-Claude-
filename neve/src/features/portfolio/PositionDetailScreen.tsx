@@ -16,6 +16,7 @@ import {
   Text,
   TrendBadge,
 } from '@/components';
+import { EditPositionForm } from '@/features/forms/EditPositionForm';
 import { valuePosition } from '@/domain';
 import { formatMinor } from '@/domain/money';
 import { DISCLAIMERS } from '@/config/app';
@@ -37,6 +38,7 @@ export function PositionDetailScreen() {
   const archivePosition = useAppStore((s) => s.archivePosition);
   const removePosition = useAppStore((s) => s.removePosition);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const position = data.positions.find((p) => p.id === id);
   const asset = position ? data.assets.find((a) => a.id === position.assetId) : undefined;
@@ -155,6 +157,7 @@ export function PositionDetailScreen() {
       ) : null}
 
       <View style={{ gap: 10 }}>
+        <Button label={`✏️ ${t.common.edit}`} onPress={() => setEditing(true)} />
         <Button
           label={t.common.archive}
           variant="secondary"
@@ -165,6 +168,8 @@ export function PositionDetailScreen() {
         />
         <Button label={t.common.delete} variant="destructive" onPress={() => setConfirmDelete(true)} />
       </View>
+
+      <EditPositionForm visible={editing} position={position} onClose={() => setEditing(false)} />
 
       <ConfirmSheet
         visible={confirmDelete}

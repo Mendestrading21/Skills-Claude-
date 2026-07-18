@@ -174,6 +174,7 @@ export function buildDemoData(): AppData {
       reducedTransparency: false,
       appLockEnabled: false,
       onboarded: true,
+      netWorthTargetMinor: 30000000, // objectif 300'000 CHF
     },
     accounts,
     assets,
