@@ -20,17 +20,27 @@ export function ScreenBackground() {
       />
       <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
         <Defs>
-          <RadialGradient id="warm" cx="82%" cy="16%" r="65%">
-            <Stop offset="0" stopColor={palette.accent} stopOpacity={0.20} />
-            <Stop offset="0.5" stopColor={palette.accentDark} stopOpacity={0.06} />
+          <RadialGradient id="warm" cx="84%" cy="12%" r="70%">
+            <Stop offset="0" stopColor={palette.accent} stopOpacity={0.26} />
+            <Stop offset="0.45" stopColor={palette.accentDark} stopOpacity={0.08} />
             <Stop offset="1" stopColor={palette.background} stopOpacity={0} />
           </RadialGradient>
-          <RadialGradient id="cold" cx="12%" cy="92%" r="60%">
+          <RadialGradient id="mint" cx="88%" cy="88%" r="60%">
+            <Stop offset="0" stopColor={palette.positive} stopOpacity={0.13} />
+            <Stop offset="1" stopColor={palette.background} stopOpacity={0} />
+          </RadialGradient>
+          <RadialGradient id="violet" cx="10%" cy="8%" r="55%">
+            <Stop offset="0" stopColor={palette.categoryViolet} stopOpacity={0.12} />
+            <Stop offset="1" stopColor={palette.background} stopOpacity={0} />
+          </RadialGradient>
+          <RadialGradient id="cold" cx="8%" cy="94%" r="58%">
             <Stop offset="0" stopColor={palette.info} stopOpacity={0.10} />
             <Stop offset="1" stopColor={palette.background} stopOpacity={0} />
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width={width} height={height} fill="url(#warm)" />
+        <Rect x="0" y="0" width={width} height={height} fill="url(#mint)" />
+        <Rect x="0" y="0" width={width} height={height} fill="url(#violet)" />
         <Rect x="0" y="0" width={width} height={height} fill="url(#cold)" />
       </Svg>
     </View>

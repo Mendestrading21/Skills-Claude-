@@ -10,6 +10,7 @@ import {
   Avatar,
   EmptyState,
   GlassCard,
+  GradientAmount,
   ListRow,
   MetricCard,
   PrivacyBadge,
@@ -95,7 +96,7 @@ export function PortfolioScreen() {
             </Text>
             {summary.hasStale ? <PrivacyBadge label="Prix indicatif" tone="muted" /> : null}
           </View>
-          <AmountText minor={summary.totalValueMinor} currency={base} variant="display" style={{ marginTop: 4 }} />
+          <GradientAmount minor={summary.totalValueMinor} currency={base} fontSize={40} />
           <View style={styles.summaryTrend}>
             <TrendBadge ratio={summary.totalGainRatio} />
             <Text variant="meta" tone="secondary">

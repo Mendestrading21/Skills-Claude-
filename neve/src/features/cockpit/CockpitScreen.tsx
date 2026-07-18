@@ -9,6 +9,7 @@ import {
   AppHeader,
   Button,
   GlassCard,
+  GradientAmount,
   Icon,
   LineChart,
   MetricCard,
@@ -128,7 +129,7 @@ export function CockpitScreen() {
             </Text>
             <PrivacyBadge label="Sur cet appareil" tone="info" />
           </View>
-          <AmountText minor={nw.netWorthMinor} currency={base} variant="display" style={{ marginTop: 6 }} />
+          <GradientAmount minor={nw.netWorthMinor} currency={base} fontSize={40} />
           <View style={styles.heroTrend}>
             <TrendBadge ratio={perf.ratio} />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>

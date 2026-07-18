@@ -9,6 +9,7 @@ import {
   Avatar,
   EmptyState,
   GlassCard,
+  GradientAmount,
   Icon,
   ListRow,
   ProgressBar,
@@ -110,7 +111,7 @@ export function WealthScreen() {
             <Text variant="micro" tone="muted">
               {t.metrics.netWorth}
             </Text>
-            <AmountText minor={nw.netWorthMinor} currency={base} variant="screenTitle" style={{ marginTop: 2 }} />
+            <GradientAmount minor={nw.netWorthMinor} currency={base} fontSize={30} />
           </View>
         </GlassCard>
       </AnimatedEntrance>

@@ -91,6 +91,15 @@ export const shadow = {
   },
 } as const;
 
+/** Warm, optimistic gradients used on hero surfaces, buttons and charts. */
+export const gradients = {
+  warm: ['#FF8A1F', '#FFC061'] as const,
+  sunrise: ['#FF6B3D', '#FF8A1F', '#FFC061'] as const,
+  mint: ['#2FD27C', '#4FD7D1'] as const,
+  violet: ['#A979FF', '#6EA8FF'] as const,
+  gold: ['#FFB15A', '#FFD98A'] as const,
+};
+
 /** Category colours cycled for allocation / budget category chips. */
 export const categoryColors = [
   palette.accent,

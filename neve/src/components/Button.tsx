@@ -1,8 +1,9 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { haptics } from '@/services/haptics';
-import { useTheme } from '@/theme';
+import { gradients, useTheme } from '@/theme';
 import { Text } from './Text';
 
 type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost';
@@ -61,6 +62,14 @@ export function Button({
         style,
       ]}
     >
+      {variant === 'primary' ? (
+        <LinearGradient
+          colors={[...gradients.warm]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? theme.colors.onAccent : theme.colors.text} />
       ) : (
@@ -83,6 +92,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
+    overflow: 'hidden',
   },
   content: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });

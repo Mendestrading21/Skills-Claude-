@@ -8,6 +8,7 @@ export { AnimatedEntrance } from './AnimatedEntrance';
 export { MetricCard } from './MetricCard';
 export { SectionHeader } from './SectionHeader';
 export { AmountText } from './AmountText';
+export { GradientAmount } from './GradientAmount';
 export { TrendBadge } from './TrendBadge';
 export { ProgressBar } from './ProgressBar';
 export { AllocationRing } from './AllocationRing';
