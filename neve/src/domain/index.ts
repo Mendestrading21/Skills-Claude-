@@ -5,4 +5,4 @@ export * from './networth';
 export * from './cashflow';
 export * from './budget';
 export * from './history';
-export * from './gamification';
+export * from './insights';

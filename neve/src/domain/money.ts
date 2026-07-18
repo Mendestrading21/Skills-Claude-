@@ -91,11 +91,14 @@ function formatCompact(abs: number): string {
   return abs.toFixed(0);
 }
 
-/** Format a signed percentage from a ratio (0.081 -> "+8.10 %"). */
-export function formatPercent(ratio: number, decimals = 2): string {
+/**
+ * Format a percentage from a ratio. By default a leading "+" marks positive
+ * *changes* (0.081 -> "+8.10 %"); pass signed=false for plain rates/shares.
+ */
+export function formatPercent(ratio: number, decimals = 2, signed = true): string {
   if (!Number.isFinite(ratio)) return '—';
   const value = ratio * 100;
-  const sign = value > 0 ? '+' : '';
+  const sign = signed && value > 0 ? '+' : '';
   return `${sign}${value.toFixed(decimals)} %`;
 }
 

@@ -31,7 +31,7 @@ import {
   selectAllocation,
   selectBudgetTotals,
   selectCashFlow,
-  selectGamification,
+  selectInsights,
   selectNetWorth,
   selectNetWorthGoal,
   selectPerformance,
@@ -74,7 +74,7 @@ export function CockpitScreen() {
   const budgetTotals = useMemo(() => selectBudgetTotals(data), [data]);
   const alerts = useMemo(() => selectPriorityAlerts(data), [data]);
   const goal = useMemo(() => selectNetWorthGoal(data), [data]);
-  const game = useMemo(() => selectGamification(data), [data]);
+  const analysis = useMemo(() => selectInsights(data), [data]);
   const savingsRate = useMemo(() => selectSavingsRate(data), [data]);
   const monthChange = useMemo(() => selectPerformance(data, '1M'), [data]);
   const sparkValues = useMemo(() => data.snapshots.map((s) => s.netWorthMinor), [data.snapshots]);
@@ -210,34 +210,34 @@ export function CockpitScreen() {
         </Pressable>
       </AnimatedEntrance>
 
-      {/* Progression / saving game */}
-      <AnimatedEntrance delay={72}>
-        <Pressable
-          onPress={() => router.push('/challenges')}
-          accessibilityRole="button"
-          style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
-        >
-          <GlassCard style={styles.block} glow="#A979FF">
-            <View style={styles.progressRow}>
-              <View style={[styles.levelChip, { borderColor: theme.colors.accent }]}>
-                <Text variant="cardValue" tone="accent" tabular>
-                  {game.level.level}
-                </Text>
+      {/* Financial analysis */}
+      {analysis.insights.length > 0 && (
+        <AnimatedEntrance delay={72}>
+          <Pressable
+            onPress={() => router.push('/insights')}
+            accessibilityRole="button"
+            style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+          >
+            <GlassCard style={styles.block} glow="#58A6FF">
+              <View style={styles.progressRow}>
+                <Text style={{ fontSize: 26 }}>{analysis.insights[0].emoji}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text variant="micro" tone="muted">
+                    ANALYSE
+                  </Text>
+                  <Text variant="cardTitle" style={{ marginTop: 1 }}>
+                    {analysis.insights[0].title}
+                  </Text>
+                  <Text variant="meta" tone="secondary" numberOfLines={2} style={{ marginTop: 2, lineHeight: 18 }}>
+                    {analysis.insights[0].body}
+                  </Text>
+                </View>
+                <Icon name="chevronRight" size={18} color={theme.colors.textMuted} />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text variant="cardTitle">🎮 {game.level.title}</Text>
-                <Text variant="meta" tone="secondary" style={{ marginTop: 1 }}>
-                  🔥 {game.streak} mois · 🏅 {game.badges.filter((b) => b.unlocked).length}/{game.badges.length} badges
-                </Text>
-              </View>
-              <Icon name="chevronRight" size={18} color={theme.colors.textMuted} />
-            </View>
-            <View style={{ marginTop: 12 }}>
-              <ProgressBar ratio={game.level.ratioToNext} />
-            </View>
-          </GlassCard>
-        </Pressable>
-      </AnimatedEntrance>
+            </GlassCard>
+          </Pressable>
+        </AnimatedEntrance>
+      )}
 
       {/* History */}
       <AnimatedEntrance delay={80}>
@@ -315,7 +315,7 @@ export function CockpitScreen() {
               </Text>
             }
             caption="ce mois"
-            onPress={() => router.push('/challenges')}
+            onPress={() => router.push('/insights')}
           />
         </View>
         <View style={styles.gridItem}>
@@ -459,14 +459,6 @@ const styles = StyleSheet.create({
   cta: { marginBottom: 16 },
   ctaCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  levelChip: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   ctaLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   goalHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   goalFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },

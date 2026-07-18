@@ -2,36 +2,34 @@ import {
   allocationByClass,
   budgetProgress,
   budgetTotals,
-  computeBadges,
-  computeLevel,
+  buildInsights,
+  computeHealth,
   computeNetWorth,
   currencyExposure,
-  goalsSummary,
+  expenseByCategory,
   monthlyCashFlow,
-  monthlyChallenge,
+  monthlyFixedCosts,
   netWorthSeries,
   rankContributors,
-  savingsStreak,
   seriesPerformance,
   summarizePortfolio,
   valuePositions,
   type AllocationSlice,
-  type Badge,
   type BudgetProgress,
   type BudgetTotals,
   type CashFlow,
-  type Challenge,
+  type CategorySpend,
   type Contributor,
-  type GoalsSummary,
+  type FinancialHealth,
+  type Insight,
   type NetWorth,
   type PortfolioContext,
   type PortfolioSummary,
   type PositionValuation,
-  type SaverLevel,
   type SeriesPoint,
 } from '@/domain';
 import type { AppData, Transaction } from '@/types';
-import { currentMonthKey, monthKey, previousMonthKey, type RangeKey } from '@/utils/date';
+import { currentMonthKey, previousMonthKey, type RangeKey } from '@/utils/date';
 import type { AssistantContext } from '@/services/assistant';
 
 export function portfolioContext(data: AppData): PortfolioContext {
@@ -126,42 +124,66 @@ export type NetWorthGoal = {
   ratio: number;
 };
 
-export type Gamification = {
-  level: SaverLevel;
-  streak: number;
-  badges: Badge[];
-  challenge: Challenge;
-  goals: GoalsSummary;
+export type FinancialAnalysis = {
+  health: FinancialHealth;
+  insights: Insight[];
+  topExpenses: CategorySpend[];
+  fixedCostsMinor: number;
 };
 
-/** Assemble the gamification state (level, streak, badges, challenge). */
-export function selectGamification(data: AppData): Gamification {
+const DISCRETIONARY_MATCH = /loisir|resto|restaurant|sortie|shopping|vêtement|jeu|abonnement/i;
+
+/** Practical financial analysis: health metrics + actionable insights. */
+export function selectInsights(data: AppData): FinancialAnalysis {
+  const base = data.preferences.baseCurrency;
   const nw = selectNetWorth(data);
   const cf = selectCashFlow(data);
   const budgets = selectBudgetProgress(data);
-  const streak = savingsStreak(data.snapshots);
-  const currencies = new Set([
-    ...data.accounts.map((a) => a.currency),
-    ...data.assets.map((a) => a.quoteCurrency),
-  ]);
-  const monthsTracked = new Set(data.snapshots.map((s) => monthKey(s.capturedAt))).size;
+  const month = currentMonthKey();
 
-  return {
-    level: computeLevel(nw.netWorthMinor),
-    streak,
-    badges: computeBadges({
-      netWorthMinor: nw.netWorthMinor,
-      streak,
-      goals: data.goals,
-      budgetsCount: budgets.length,
-      budgetsOverCount: budgets.filter((b) => b.isOver).length,
-      currenciesCount: currencies.size,
-      hasPension: data.accounts.some((a) => a.kind === 'pension' && !a.isArchived),
-      monthsTracked,
-    }),
-    challenge: monthlyChallenge(cf.incomeMinor, cf.netMinor),
-    goals: goalsSummary(data.goals),
-  };
+  const spentThis = expenseByCategory(data.transactions, month, base, data.fxRates);
+  const spentPrev = expenseByCategory(data.transactions, previousMonthKey(month), base, data.fxRates);
+
+  const topExpenses: CategorySpend[] = Array.from(spentThis.entries())
+    .map(([id, spentMinor]) => ({
+      id,
+      name: data.categories.find((c) => c.id === id)?.name ?? 'Non catégorisé',
+      spentMinor,
+    }))
+    .sort((a, b) => b.spentMinor - a.spentMinor);
+
+  const discretionary = topExpenses.filter((c) => DISCRETIONARY_MATCH.test(c.name));
+  const discretionaryMinor = discretionary.reduce((s, c) => s + c.spentMinor, 0);
+  const discretionaryLabel =
+    discretionary.length > 0 ? discretionary.map((c) => c.name.toLowerCase()).slice(0, 2).join(' et ') : 'vos dépenses variables';
+
+  const fixedCostsMinor = monthlyFixedCosts(data.recurring);
+  const goal = selectNetWorthGoal(data);
+
+  const insights = buildInsights({
+    currency: base,
+    incomeMinor: cf.incomeMinor,
+    expenseMinor: cf.expenseMinor,
+    netMinor: cf.netMinor,
+    fixedCostsMinor,
+    liquidityMinor: nw.liquidityMinor,
+    topCategories: topExpenses,
+    prevByCategory: spentPrev,
+    overBudget: budgets.filter((b) => b.isOver).map((b) => ({ name: b.categoryName, overMinor: b.spentMinor - b.limitMinor })),
+    discretionaryMinor,
+    discretionaryLabel,
+    goal: goal ? { targetMinor: goal.targetMinor, currentMinor: goal.currentMinor } : null,
+  });
+
+  const health = computeHealth({
+    incomeMinor: cf.incomeMinor,
+    expenseMinor: cf.expenseMinor,
+    netMinor: cf.netMinor,
+    fixedCostsMinor,
+    liquidityMinor: nw.liquidityMinor,
+  });
+
+  return { health, insights, topExpenses, fixedCostsMinor };
 }
 
 /** Progress toward the optional net-worth objective, or null when unset. */

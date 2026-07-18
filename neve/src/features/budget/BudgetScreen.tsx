@@ -166,7 +166,7 @@ export function BudgetScreen() {
       {/* Goals */}
       {data.goals.length > 0 && (
         <>
-          <SectionHeader title={`🐷 ${t.budget.goals}`} actionLabel="Défis" onAction={() => router.push('/challenges')} />
+          <SectionHeader title={`🐷 ${t.budget.goals}`} actionLabel="Analyse" onAction={() => router.push('/insights')} />
           <GlassCard style={styles.block}>
             {data.goals.map((g, i) => {
               const ratio = g.targetMinor === 0 ? 0 : g.currentMinor / g.targetMinor;
