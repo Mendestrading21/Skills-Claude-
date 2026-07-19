@@ -103,6 +103,8 @@ export function SettingsScreen() {
       {/* Data */}
       <SectionHeader title={t.settings.data} />
       <GlassCard style={styles.block}>
+        <ActionRow icon="refresh" title="Configuration guidée de mes comptes" onPress={() => router.push('/setup')} />
+        <RowDivider />
         <ActionRow icon="download" title={t.settings.export} onPress={() => setExportFormat('json')} />
         <RowDivider />
         <ActionRow icon="download" title={t.settings.exportCsv} onPress={() => setExportFormat('csv')} />

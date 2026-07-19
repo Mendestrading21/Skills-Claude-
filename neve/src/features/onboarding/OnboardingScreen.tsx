@@ -152,8 +152,15 @@ export function OnboardingScreen() {
             <View style={styles.center}>
               <StepTitle title={t.onboarding.startTitle} body={t.onboarding.startBody} />
               <View style={{ marginTop: 28, alignSelf: 'stretch', gap: 12 }}>
-                <Button label={t.onboarding.startWithDemo} onPress={() => finish(true)} />
-                <Button label={t.onboarding.startFresh} variant="secondary" onPress={() => finish(false)} />
+                <Button
+                  label="⚡ Configurer mes comptes"
+                  onPress={() => {
+                    completeOnboarding({ baseCurrency: currency });
+                    router.replace('/setup');
+                  }}
+                />
+                <Button label={t.onboarding.startWithDemo} variant="secondary" onPress={() => finish(true)} />
+                <Button label={t.onboarding.startFresh} variant="ghost" onPress={() => finish(false)} />
               </View>
             </View>
           )}

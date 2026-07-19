@@ -34,6 +34,7 @@ export default function RootLayout() {
             <Stack.Screen name="settings" options={{ presentation: 'card' }} />
             <Stack.Screen name="assistant" options={{ presentation: 'card' }} />
             <Stack.Screen name="insights" options={{ presentation: 'card' }} />
+            <Stack.Screen name="setup" options={{ presentation: 'card' }} />
             <Stack.Screen name="position/[id]" />
             <Stack.Screen name="account/[id]" />
           </Stack>

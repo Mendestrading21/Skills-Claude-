@@ -93,10 +93,11 @@ export function CockpitScreen() {
             Bienvenue
           </Text>
           <Text variant="meta" tone="secondary" center style={{ marginTop: 8 }}>
-            Ajoutez un compte avec le bouton +, ou explorez l’application avec un jeu de données de démonstration.
+            Configurez vos comptes en 2 minutes pour un suivi personnalisé, ou explorez avec des données de démonstration.
           </Text>
-          <View style={{ marginTop: 20, alignSelf: 'stretch' }}>
-            <Button label={t.onboarding.startWithDemo} onPress={loadDemo} />
+          <View style={{ marginTop: 20, alignSelf: 'stretch', gap: 10 }}>
+            <Button label="⚡ Configurer mes comptes" onPress={() => router.push('/setup')} />
+            <Button label={t.onboarding.startWithDemo} variant="secondary" onPress={loadDemo} />
           </View>
         </GlassCard>
       </Screen>
